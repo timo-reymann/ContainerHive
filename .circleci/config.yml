@@ -1,0 +1,114 @@
+version: '2.1'
+
+only_tags: &only_tags
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+orbs:
+  github-cli: circleci/github-cli@2.7.2
+  codecov: codecov/codecov@5.4.3
+  go: circleci/go@3.0.3
+  github-utils: trustedshops-public/github-utils@1.1.3
+  semantic-release: trustedshops-public/semantic-release@6.1.0
+
+executors:
+  go:
+    docker:
+      - image: cimg/go:1.24
+  python:
+    docker:
+      - image: cimg/python:3.13
+
+jobs:
+  unit-test:
+    executor: go
+    steps:
+      - checkout
+      - go/with-cache:
+          steps:
+            - run:
+                name: Run tests
+                command: |
+                  go test -coverprofile=coverage.txt -covermode=atomic   -v ./...
+                  make save-coverage-report
+      - codecov/upload
+      - store_artifacts:
+          path: coverage.html
+  attach-binaries-to-release:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - github-cli/install:
+          version: "2.21.2"
+      - run:
+          name: Attach binaries to release
+          command: |
+            gh release upload ${CIRCLE_TAG} dist/*
+  build:
+    executor: go
+    steps:
+      - checkout
+      - go/with-cache:
+          steps:
+            - run:
+                name: Build binaries
+                command: |
+                  make build -j4
+                  make create-checksums
+            - persist_to_workspace:
+                root: ./
+                paths:
+                  - dist/
+  publish-container-image:
+    executor: docker/docker
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Build and publish images
+          command: |
+            echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker buildx create --use
+            make build-docker
+      - docker/update-description:
+          image: timoreymann/container-hive
+          docker-username: DOCKER_USERNAME
+          docker-password: DOCKER_TOKEN
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - unit-test
+      - build:
+          requires:
+            - unit-test
+#      - semantic-release/with_existing_config:
+#          name: semantic-release
+#          additional_packages: "@google/semantic-release-replace-plugin"
+#          context:
+#            - semantic-release
+#          filters:
+#            branches:
+#              only:
+#                - main
+  release:
+    jobs:
+      - build:
+          <<: *only_tags
+      - attach-binaries-to-release:
+          <<: *only_tags
+          requires:
+            - build
+      - publish-container-image:
+          requires:
+            - build
+          <<: *only_tags
