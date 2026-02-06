@@ -1,0 +1,51 @@
+.PHONY: help
+
+SHELL := /bin/bash
+VERSION=$(shell git describe --tags)
+NOW=$(shell date +"%Y-%m-%d_%H:%M:%S")
+COMMIT_REF=$(shell git rev-parse --short HEAD)
+BUILD_ARGS=-ldflags "-X github.com/timo-reymann/ContainerHive/internal/buildinfo.GitSha=$(COMMIT_REF) -X github.com/timo-reymann/ContainerHive/internal/buildinfo.Version=$(VERSION) -X github.com/timo-reymann/ContainerHive/internal/buildinfo.BuildTime=$(NOW)" -tags prod
+BIN_PREFIX="dist/"
+BIN_PREFIX_CH_CLI="$(BIN_PREFIX)ch-"
+CMD_CH_CLI = "./cmd/ch"
+
+clean: ## Cleanup artifacts
+	@rm -rf dist/
+
+help: ## Display this help page
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[33m%-30s\033[0m %s\n", $$1, $$2}'
+
+coverage: ## Run tests and measure coverage
+	@go test -covermode=count -coverprofile=/tmp/count.out -v ./...
+
+test-coverage-report: coverage ## Run test and display coverage report in browser
+	@go tool cover -html=/tmp/count.out
+
+save-coverage-report: coverage ## Save coverage report to coverage.html
+	@go tool cover -html=/tmp/count.out -o coverage.html
+
+create-dist: ## Create dist folder if not already existent
+	@mkdir -p dist/
+
+build-linux: create-dist ## Build binaries for linux
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BIN_PREFIX_CH_CLI)linux-amd64 $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o $(BIN_PREFIX_CH_CLI)linux-arm64 $(BUILD_ARGS) $(CMD_CH_CLI)
+
+build-darwin: create-dist  ## Build binaries for macOS
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(BIN_PREFIX_CH_CLI)darwin-amd64 $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o $(BIN_PREFIX_CH_CLI)darwin-arm64 $(BUILD_ARGS) $(CMD_CH_CLI)
+
+build-image-container-hive: ## Build the container hive image
+	@docker buildx build . \
+		-t timoreymann/container-hive:${VERSION} \
+		-t timoreymann/container-hive:latest \
+		-f Dockerfile \
+		--platform linux/amd64,linux/arm64 \
+		--push
+
+create-checksums: ## Create checksums for binaries
+	@cd dist && sha256sum * > checksums.sha256sum
+
+build-image: build-image-container-hive ## Build all images
+
+build: build-linux build-darwin create-checksums ## Build binaries for all platform
