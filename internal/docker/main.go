@@ -6,6 +6,9 @@ import (
 	"os"
 
 	dockerClient "github.com/docker/docker/client"
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/daemon"
+	"github.com/google/go-containerregistry/pkg/v1/layout"
 )
 
 type Client struct {
@@ -27,18 +30,54 @@ func NewClient() (*Client, error) {
 	}, nil
 }
 
-func (c *Client) LoadImageFromTar(ctx context.Context, tarPath string) (string, error) {
-	imgFile, err := os.Open(tarPath)
+func (c *Client) LoadImageFromTar(_ context.Context, tarPath string) (string, error) {
+	tmpDir, err := os.MkdirTemp("", "oci-layout-*")
 	if err != nil {
 		return "", err
 	}
-	defer imgFile.Close()
+	defer os.RemoveAll(tmpDir)
 
-	res, err := c.docker.ImageLoad(ctx, imgFile)
-	if err != nil {
-		return "", errors.Join(errors.New("failed to load image"), err)
+	if err := extractTar(tarPath, tmpDir); err != nil {
+		return "", errors.Join(errors.New("failed to extract OCI tar"), err)
 	}
-	defer res.Body.Close()
 
-	return imageNameFromTar(tarPath)
+	layoutPath, err := layout.FromPath(tmpDir)
+	if err != nil {
+		return "", errors.Join(errors.New("failed to read OCI layout"), err)
+	}
+
+	idx, err := layoutPath.ImageIndex()
+	if err != nil {
+		return "", err
+	}
+
+	idxManifest, err := idx.IndexManifest()
+	if err != nil {
+		return "", err
+	}
+
+	if len(idxManifest.Manifests) == 0 {
+		return "", errors.New("no manifests in OCI layout")
+	}
+
+	imageName, ok := idxManifest.Manifests[0].Annotations["io.containerd.image.name"]
+	if !ok || imageName == "" {
+		return "", errors.New("no image name annotation in OCI index")
+	}
+
+	img, err := layoutPath.Image(idxManifest.Manifests[0].Digest)
+	if err != nil {
+		return "", errors.Join(errors.New("failed to read image from layout"), err)
+	}
+
+	tag, err := name.NewTag(imageName)
+	if err != nil {
+		return "", errors.Join(errors.New("invalid image name"), err)
+	}
+
+	if _, err := daemon.Write(tag, img); err != nil {
+		return "", errors.Join(errors.New("failed to load image into Docker"), err)
+	}
+
+	return imageName, nil
 }
