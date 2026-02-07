@@ -88,6 +88,7 @@ To get started please read the [Contribution Guidelines](./CONTRIBUTING.md).
 - [Docker](https://docs.docker.com/get-docker/)
 - [pre-commit](https://pre-commit.com/)
 - [Go](https://go.dev/doc/install)
+- [deterministic-zip](https://github.com/timo-reymann/deterministic-zip)
 
 ### Test
 

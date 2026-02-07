@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Attach binaries to release
           command: |
-            gh release upload ${CIRCLE_TAG} dist/*
+            gh release upload ${CIRCLE_TAG} dist/*.zip dist/*.zip.sha256
   build:
     executor: go
     steps:
@@ -62,11 +62,12 @@ jobs:
                 name: Build binaries
                 command: |
                   make build -j4
-                  make create-checksums
+                  make pack
             - persist_to_workspace:
                 root: ./
                 paths:
-                  - dist/
+                  - dist/*.zip
+                  - dist/*.zip.sha256
   publish-container-image:
     executor: docker/docker
     steps:

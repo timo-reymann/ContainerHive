@@ -6,7 +6,6 @@ NOW=$(shell date +"%Y-%m-%d_%H:%M:%S")
 COMMIT_REF=$(shell git rev-parse --short HEAD)
 BUILD_ARGS=-ldflags "-X github.com/timo-reymann/ContainerHive/internal/buildinfo.GitSha=$(COMMIT_REF) -X github.com/timo-reymann/ContainerHive/internal/buildinfo.Version=$(VERSION) -X github.com/timo-reymann/ContainerHive/internal/buildinfo.BuildTime=$(NOW)" -tags prod
 BIN_PREFIX="dist/"
-BIN_PREFIX_CH_CLI="$(BIN_PREFIX)ch-"
 CMD_CH_CLI = "./cmd/ch"
 
 clean: ## Cleanup artifacts
@@ -26,14 +25,18 @@ save-coverage-report: coverage ## Save coverage report to coverage.html
 
 create-dist: ## Create dist folder if not already existent
 	@mkdir -p dist/
+	@mkdir -p dist/linux-amd64
+	@mkdir -p dist/linux-arm64
+	@mkdir -p dist/darwin-arm64
+	@mkdir -p dist/darwin-amd64
 
 build-linux: create-dist ## Build binaries for linux
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BIN_PREFIX_CH_CLI)linux-amd64 $(BUILD_ARGS) $(CMD_CH_CLI)
-	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o $(BIN_PREFIX_CH_CLI)linux-arm64 $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BIN_PREFIX)/linux-amd64/ch $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o $(BIN_PREFIX)linux-arm64/ch $(BUILD_ARGS) $(CMD_CH_CLI)
 
 build-darwin: create-dist  ## Build binaries for macOS
-	@CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(BIN_PREFIX_CH_CLI)darwin-amd64 $(BUILD_ARGS) $(CMD_CH_CLI)
-	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o $(BIN_PREFIX_CH_CLI)darwin-arm64 $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o $(BIN_PREFIX)darwin-amd64/ch $(BUILD_ARGS) $(CMD_CH_CLI)
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o $(BIN_PREFIX)darwin-arm64/ch $(BUILD_ARGS) $(CMD_CH_CLI)
 
 build-image-container-hive: ## Build the container hive image
 	@docker buildx build . \
@@ -44,8 +47,14 @@ build-image-container-hive: ## Build the container hive image
 		--push
 
 create-checksums: ## Create checksums for binaries
-	@find ./dist -type f -exec sh -c 'sha256sum {} | cut -d " " -f 1 > {}.sha256' {} \;
+	@find ./dist/*/* -type f -exec sh -c 'sha256sum {} | cut -d " " -f 1 > {}.sha256' {} \;
 
 build-image: build-image-container-hive ## Build all images
 
-build: create-dist build-linux build-darwin create-checksums ## Build binaries for all platform
+build: create-dist build-linux build-darwin ## Build binaries for all platform
+
+bundle:
+	@cd dist/ && find * -type d -exec sh -c 'cd {} && cp ../../LICENSE LICENSE.txt && deterministic-zip -r ../{}.zip .' \;
+	@find ./dist/*.zip -type f -exec sh -c 'sha256sum {} | cut -d " " -f 1 > {}.sha256' {} \;
+
+pack: create-checksums bundle ## Create checksums and pack archives for delivery
