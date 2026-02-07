@@ -24,7 +24,8 @@ ContainerHive
 - **Reproducible layers**: Guarantee consistent, bit-for-bit identical builds every time (given the same inputs)
 - **Testing built in**: Validate images as part of the build process, no extra tooling needed.
 - **Smart caching**: Optimized caching that works out of the box, no manual tuning required.
-- **Enterprise-ready**: Built for scale, compliance, and integration with enterprise workflows (SBOMs, multi-platform, structured governance).
+- **Enterprise-ready**: Built for scale, compliance, and integration with enterprise workflows (SBOMs, multi-platform,
+  structured governance).
 
 ## Requirements
 
@@ -66,7 +67,8 @@ CI pipeline generation. It’s built for engineers who want to focus on shipping
 
 <!-- Link for additional documentations -->
 
-> TBD
+Documentation is available at [container-hive.timo-reymann.de](https://container-hive.timo-reymann.de/), hosted on
+GitHub Pages.
 
 ## Contributing
 
