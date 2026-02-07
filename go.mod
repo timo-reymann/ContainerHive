@@ -4,6 +4,7 @@ go 1.25.6
 
 require (
 	github.com/GoogleContainerTools/container-structure-test v1.22.1
+	github.com/docker/docker v28.5.2+incompatible
 	github.com/moby/buildkit v0.27.1
 	github.com/testcontainers/testcontainers-go v0.40.0
 	github.com/tonistiigi/fsutil v0.0.0-20251211185533-a2aa163d723f
@@ -35,7 +36,6 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v29.1.4+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
-	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.5 // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect

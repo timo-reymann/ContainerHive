@@ -1,0 +1,27 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: check-symlinks
+      - id: check-vcs-permalinks
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: check-case-conflict
+      - id: check-toml
+      - id: check-xml
+      - id: fix-byte-order-marker
+      - id: destroyed-symlinks
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.4
+    hooks:
+      - id: go-mod-tidy
+      - id: go-mod-tidy-repo
+      - id: go-fmt
+      - id: go-vet-mod
