@@ -44,8 +44,8 @@ build-image-container-hive: ## Build the container hive image
 		--push
 
 create-checksums: ## Create checksums for binaries
-	@cd dist && sha256sum * > checksums.sha256sum
+	@find ./dist -type f -exec sh -c 'sha256sum {} | cut -d " " -f 1 > {}.sha256' {} \;
 
 build-image: build-image-container-hive ## Build all images
 
-build: create-dist build-linux build-darwin ## Build binaries for all platform
+build: create-dist build-linux build-darwin create-checksums ## Build binaries for all platform
