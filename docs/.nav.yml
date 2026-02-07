@@ -1,0 +1,8 @@
+nav:
+  - index.md
+  - Development:
+      - Architecture Decision Records:
+          - adr/*.md
+
+ignore:
+  - adr/000-TEMPLATE.md
