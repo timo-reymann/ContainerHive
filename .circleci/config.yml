@@ -105,6 +105,7 @@ jobs:
       - run:
           name: Build mkdocs documentation
           command: |
+            mkdir gh-pages
             pip install -r requirements-docs.txt
             mkdocs build
             mv site/* gh-pages/
@@ -116,10 +117,6 @@ jobs:
           name: Set up CNAME
           command: |
             echo "container-hive.timo-reymann.de" > gh-pages/CNAME
-      - run:
-          name: Copy ci templates
-          command: |
-            cp -R ci-templates/ gh-pages/
       - github-utils/publish_github_pages:
           folder: gh-pages/
           git_commit_author_email: "no-reply@timo-reymann.de"
