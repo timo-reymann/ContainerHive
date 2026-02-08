@@ -18,7 +18,7 @@ func main() {
 		log.Fatal("failed to generate schema", err)
 	}
 
-	schema.ID = "https://container-hive.timo-reymann.de/_schemas/image.schema.json"
+	schema.ID = "https://container-hive.timo-reymann.de/schemas/image.schema.json"
 	schema.Title = "Image definition"
 	schema.Description = "Image definition configuration schema for ContainerHive."
 
