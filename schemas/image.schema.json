@@ -92,6 +92,8 @@
       }
     }
   },
+  "$id": "https://container-hive.timo-reymann.de/_schemas/image.schema.json",
+  "title": "Image definition",
   "description": "Image definition configuration schema for ContainerHive.",
   "required": [
     "tags"

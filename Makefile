@@ -15,7 +15,7 @@ help: ## Display this help page
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[33m%-30s\033[0m %s\n", $$1, $$2}'
 
 coverage: ## Run tests and measure coverage
-	@go test -covermode=count -coverprofile=/tmp/count.out -v ./...
+	@go test -covermode=count -coverprofile=/tmp/count.out -v $(go list ./... | grep -v /vendor/)
 
 test-coverage-report: coverage ## Run test and display coverage report in browser
 	@go tool cover -html=/tmp/count.out

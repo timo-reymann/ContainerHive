@@ -1,5 +1,7 @@
 {
   "type": "object",
+  "$id": "https://container-hive.timo-reymann.de/_schemas/project.schema.json",
+  "title": "Project configuration",
   "description": "Project-level configuration schema for ContainerHive.",
   "additionalProperties": false
 }

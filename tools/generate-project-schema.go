@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 import (
@@ -14,7 +16,6 @@ func main() {
 	schema, err := jsonschema.For[model.HiveProjectConfig](&jsonschema.ForOptions{})
 	if err != nil {
 		log.Fatal("failed to generate schema", err)
-		return
 	}
 
 	schema.ID = "https://container-hive.timo-reymann.de/_schemas/project.schema.json"
@@ -30,6 +31,5 @@ func main() {
 	err = os.WriteFile("schemas/project.schema.json", indented, 0644)
 	if err != nil {
 		log.Fatal("failed to write schema file", err)
-		return
 	}
 }
