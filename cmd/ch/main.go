@@ -16,6 +16,8 @@ import (
 	containerStructureTest "github.com/timo-reymann/ContainerHive/internal/container_structure_test"
 	"github.com/timo-reymann/ContainerHive/internal/docker"
 	"github.com/timo-reymann/ContainerHive/internal/syft"
+	"github.com/timo-reymann/ContainerHive/pkg/discovery"
+	"github.com/timo-reymann/ContainerHive/pkg/rendering"
 )
 
 const (
@@ -49,7 +51,17 @@ fileExistenceTests:
 `
 
 func main() {
-	ctx := context.Background()
+	ctx := context.TODO()
+	project, err := discovery.DiscoverProject(ctx, "example")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Discovered project: %v", project)
+
+	if err := rendering.RenderProject(ctx, project, "example/dist"); err != nil {
+		log.Fatal(err)
+	}
+
 	tmpDir, err := os.MkdirTemp("", "ch-smoke-*")
 	if err != nil {
 		log.Fatal(err)
@@ -110,7 +122,7 @@ func main() {
 			Root: buildCtxDir,
 		},
 	}, func(ch chan *client.SolveStatus) error {
-		d, err := progressui.NewDisplay(os.Stderr, progressui.TtyMode)
+		d, err := progressui.NewDisplay(os.Stdout, progressui.TtyMode)
 		if err != nil {
 			// If an error occurs while attempting to create the tty display,
 			// fallback to using plain mode on stdout (in contrast to stderr).
@@ -134,11 +146,11 @@ func main() {
 	defer dockerClient.Close()
 
 	runner := &containerStructureTest.TestRunner{
-		TestDefinitionPath: testDefPath,
-		Image:              tarFile,
-		Platform:           platform,
-		ReportFile:         reportFile,
-		DockerClient:       dockerClient,
+		TestDefinitionPaths: []string{testDefPath},
+		Image:               tarFile,
+		Platform:            platform,
+		ReportFile:          reportFile,
+		DockerClient:        dockerClient,
 	}
 	if err := runner.Run(); err != nil {
 		log.Fatalf("Container structure tests failed: %v", err)
