@@ -1,0 +1,5 @@
+{
+  "type": "object",
+  "description": "Project-level configuration schema for ContainerHive.",
+  "additionalProperties": false
+}

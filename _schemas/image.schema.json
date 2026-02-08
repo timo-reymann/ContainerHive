@@ -1,0 +1,100 @@
+{
+  "type": "object",
+  "properties": {
+    "tags": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the tag"
+          },
+          "versions": {
+            "type": "object",
+            "description": "Versions to use for this tag",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "build_args": {
+            "type": "object",
+            "description": "Build args to specify for this tag",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Tags to create for this image"
+    },
+    "variants": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the variant"
+          },
+          "tag_suffix": {
+            "type": "string",
+            "description": "Suffix to append to the tag name for this variant"
+          },
+          "versions": {
+            "type": "object",
+            "description": "Versions to use for this variant",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "build_args": {
+            "type": "object",
+            "description": "Build args to add for this variant",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "tag_suffix"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Variants to create for this image"
+    },
+    "versions": {
+      "type": "object",
+      "description": "Versions to use for this image",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "build_args": {
+      "type": "object",
+      "description": "Build args to add for this image",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "description": "Image definition configuration schema for ContainerHive.",
+  "required": [
+    "tags"
+  ],
+  "additionalProperties": false
+}
