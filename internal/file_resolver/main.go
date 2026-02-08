@@ -1,31 +1,41 @@
 package file_resolver
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/timo-reymann/ContainerHive/internal/file_resolver/templating"
 )
 
 const TemplateExtensionGoTemplate = "gotpl"
 
-var SupportedTemplateExtensions = []string{
+var supportedTemplateExtensions = []string{
 	TemplateExtensionGoTemplate,
 }
+
+var processorMapping = map[string]templating.Processor{
+	TemplateExtensionGoTemplate: &templating.GoTemplateTemplatingProcessor{},
+}
+
+var NoFileCandidatesErr = errors.New("no file candidates found")
 
 func GetFileCandidates(baseName string, extensions ...string) []string {
 	extLen := len(extensions)
 	var possibleNames []string
 
 	if extLen == 0 {
-		possibleNames = make([]string, len(SupportedTemplateExtensions))
-		for idx, tmplExt := range SupportedTemplateExtensions {
-			possibleNames[idx] = fmt.Sprintf("%s.%s", baseName, tmplExt)
+		possibleNames = make([]string, len(supportedTemplateExtensions)+1)
+		possibleNames[0] = baseName
+		for idx, tmplExt := range supportedTemplateExtensions {
+			possibleNames[idx+1] = fmt.Sprintf("%s.%s", baseName, tmplExt)
 		}
 	} else {
-		possibleNames = make([]string, extLen*len(SupportedTemplateExtensions))
+		possibleNames = make([]string, extLen*len(supportedTemplateExtensions))
 		idx := 0
 		for _, ext := range extensions {
-			for _, tmplExt := range SupportedTemplateExtensions {
+			for _, tmplExt := range supportedTemplateExtensions {
 				possibleNames[idx] = fmt.Sprintf("%s.%s.%s", baseName, ext, tmplExt)
 				idx++
 			}
@@ -42,5 +52,5 @@ func ResolveFirstExistingFile(root string, candidates ...string) (string, error)
 			return candidatePath, nil
 		}
 	}
-	return "", nil
+	return "", NoFileCandidatesErr
 }
