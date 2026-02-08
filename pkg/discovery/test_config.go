@@ -4,9 +4,11 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/timo-reymann/ContainerHive/internal/file_resolver"
 )
 
-var testConfigFileNames = []string{"test.yaml", "test.yml", "test.yml.gotpl", "test.yaml.gotpl"}
+var testConfigFileNames = file_resolver.GetFileCandidates("test", "yml", "yaml")
 
 func getTestConfigFilePath(root string) (string, error) {
 	for _, name := range testConfigFileNames {

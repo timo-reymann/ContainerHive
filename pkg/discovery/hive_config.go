@@ -6,7 +6,12 @@ import (
 	"path/filepath"
 )
 
-var hiveConfigFileNames = []string{"hive.yaml", "hive.yml", "container-hive.yaml", "container-hive.yml"}
+var hiveConfigFileNames = []string{
+	"hive.yaml",
+	"hive.yml",
+	"container-hive.yaml",
+	"container-hive.yml",
+}
 
 func getContainerHiveConfigFile(root string) (string, error) {
 	for _, name := range hiveConfigFileNames {
