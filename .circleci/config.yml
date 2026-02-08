@@ -95,8 +95,6 @@ jobs:
           docker-password: DOCKER_TOKEN
   build-gh-pages:
     executor: node
-    environment:
-      PIP_CACHE_DIR: /tmp/pip-cache
     steps:
       - checkout
       - restore_cache:

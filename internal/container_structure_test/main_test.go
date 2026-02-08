@@ -85,7 +85,7 @@ func TestIntegrationContainerStructureTest(t *testing.T) {
 				"DOCKER_TLS_CERTDIR": "",
 			},
 			Networks:   []string{net.Name},
-			WaitingFor: wait.ForListeningPort("2375/tcp"),
+			WaitingFor: wait.ForHTTP("/_ping").WithPort("2375/tcp"),
 		},
 		Started: true,
 	})
