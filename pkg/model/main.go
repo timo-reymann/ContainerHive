@@ -11,26 +11,28 @@ type Tag struct {
 }
 
 type Image struct {
-	Identifier         string
-	Name               string
-	RootDir            string
-	RootFSDir          string
-	TestConfigFilePath string
-	DefinitionFilePath string
-	Versions           Versions
-	BuildArgs          BuildArgs `yaml:"build_args"`
-	Tags               map[string]*Tag
-	Variants           map[string]*ImageVariant
+	Identifier          string
+	Name                string
+	RootDir             string
+	RootFSDir           string
+	TestConfigFilePath  string
+	DefinitionFilePath  string
+	BuildEntryPointPath string
+	Versions            Versions
+	BuildArgs           BuildArgs `yaml:"build_args"`
+	Tags                map[string]*Tag
+	Variants            map[string]*ImageVariant
 }
 
 type ImageVariant struct {
-	Name               string
-	RootDir            string
-	RootFSDir          string
-	TagSuffix          string `yaml:"tag_suffix"`
-	TestConfigFilePath string
-	Versions           Versions
-	BuildArgs          BuildArgs `yaml:"build_args"`
+	Name                string
+	BuildEntryPointPath string
+	RootDir             string
+	RootFSDir           string
+	TagSuffix           string `yaml:"tag_suffix"`
+	TestConfigFilePath  string
+	Versions            Versions
+	BuildArgs           BuildArgs `yaml:"build_args"`
 }
 
 type ContainerHiveProject struct {

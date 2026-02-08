@@ -6,13 +6,17 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/timo-reymann/ContainerHive/internal/file_resolver"
 	"github.com/timo-reymann/ContainerHive/pkg/model"
 	"gopkg.in/yaml.v3"
 )
 
 const rootFsDirName = "rootfs"
 
-var imageConfigFileNames = []string{"image.yaml", "image.yml"}
+var imageConfigFileNames = []string{
+	"image.yaml",
+	"image.yml",
+}
 
 type variantConfig struct {
 	Name      string
@@ -96,17 +100,23 @@ func processImageConfig(projectRoot, configFilePath string) (*model.Image, error
 		return nil, err
 	}
 
+	dockerfilePath, err := getBuildEntrypointPath(imageRoot)
+	if err != nil {
+		return nil, errors.Join(errors.New("failed to discover Dockerfile"), err)
+	}
+
 	return &model.Image{
-		RootDir:            filepath.Join(projectRoot, relativeRoot),
-		RootFSDir:          rootFsPath,
-		Identifier:         relativeRoot,
-		Name:               name,
-		TestConfigFilePath: testConfigFilePath,
-		DefinitionFilePath: configFilePath,
-		Versions:           parsedImageDef.Versions,
-		BuildArgs:          nil,
-		Variants:           indexedVariants,
-		Tags:               processTags(parsedImageDef),
+		RootDir:             filepath.Join(projectRoot, relativeRoot),
+		BuildEntryPointPath: dockerfilePath,
+		RootFSDir:           rootFsPath,
+		Identifier:          relativeRoot,
+		Name:                name,
+		TestConfigFilePath:  testConfigFilePath,
+		DefinitionFilePath:  configFilePath,
+		Versions:            parsedImageDef.Versions,
+		BuildArgs:           parsedImageDef.BuildArgs,
+		Variants:            indexedVariants,
+		Tags:                processTags(parsedImageDef),
 	}, nil
 }
 
@@ -133,14 +143,20 @@ func processVariants(imageDef *imageDefinitionConfig, imageRoot string) (map[str
 			return nil, errors.Join(errors.New("failed to discover test config file for variant "+v.Name), err)
 		}
 
+		dockerfilePath, err := file_resolver.ResolveFirstExistingFile(variantRoot, dockerfileConfigFileNames...)
+		if err != nil {
+			return nil, errors.Join(errors.New("failed to discover Dockerfile for variant "+v.Name), err)
+		}
+
 		variant := &model.ImageVariant{
-			Name:               v.Name,
-			TestConfigFilePath: testConfigFilePath,
-			RootDir:            variantRoot,
-			TagSuffix:          v.TagSuffix,
-			Versions:           v.Versions,
-			BuildArgs:          v.BuildArgs,
-			RootFSDir:          variantFsRoot,
+			Name:                v.Name,
+			BuildEntryPointPath: dockerfilePath,
+			TestConfigFilePath:  testConfigFilePath,
+			RootDir:             variantRoot,
+			TagSuffix:           v.TagSuffix,
+			Versions:            v.Versions,
+			BuildArgs:           v.BuildArgs,
+			RootFSDir:           variantFsRoot,
 		}
 
 		indexedVariants[v.Name] = variant
