@@ -22,7 +22,7 @@ type variantConfig struct {
 }
 
 type imageDefinitionConfig struct {
-	Tags      []model.Tag
+	Tags      []*model.Tag
 	Variants  []variantConfig
 	Versions  model.Versions
 	BuildArgs model.BuildArgs `yaml:"build_args"`
@@ -106,7 +106,16 @@ func processImageConfig(projectRoot, configFilePath string) (*model.Image, error
 		Versions:           parsedImageDef.Versions,
 		BuildArgs:          nil,
 		Variants:           indexedVariants,
+		Tags:               processTags(parsedImageDef),
 	}, nil
+}
+
+func processTags(imageDef *imageDefinitionConfig) map[string]*model.Tag {
+	tags := make(map[string]*model.Tag)
+	for _, tag := range imageDef.Tags {
+		tags[tag.Name] = tag
+	}
+	return tags
 }
 
 func processVariants(imageDef *imageDefinitionConfig, imageRoot string) (map[string]*model.ImageVariant, error) {

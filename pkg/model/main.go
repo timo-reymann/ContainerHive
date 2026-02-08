@@ -19,6 +19,7 @@ type Image struct {
 	DefinitionFilePath string
 	Versions           Versions
 	BuildArgs          BuildArgs `yaml:"build_args"`
+	Tags               map[string]*Tag
 	Variants           map[string]*ImageVariant
 }
 
