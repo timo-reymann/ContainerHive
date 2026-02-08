@@ -6,13 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/timo-reymann/ContainerHive/internal/file_resolver"
 	"github.com/timo-reymann/ContainerHive/pkg/model"
 	"golang.org/x/sync/errgroup"
 )
-
-func mkdir(targetPath string) error {
-	return os.MkdirAll(targetPath, 0755)
-}
 
 func processImagesForName(ctx context.Context, rootPath string, images []*model.Image) error {
 	eg, _ := errgroup.WithContext(ctx)
@@ -50,6 +47,14 @@ func processImagesForName(ctx context.Context, rootPath string, images []*model.
 	return eg.Wait()
 }
 
+func createTestsFolder(rootPath string) (string, error) {
+	testsRoot := filepath.Join(rootPath, "tests")
+	if err := mkdir(testsRoot); err != nil {
+		return "", errors.Join(errors.New("failed to create tests directory"), err)
+	}
+	return testsRoot, nil
+}
+
 func setupImageDir(tagPath string, image *model.Image) error {
 	if err := mkdir(tagPath); err != nil {
 		return errors.Join(errors.New("failed to create tag directory"), err)
@@ -60,6 +65,18 @@ func setupImageDir(tagPath string, image *model.Image) error {
 			return errors.Join(errors.New("failed to copy rootfs"), err)
 		}
 	}
+
+	if image.TestConfigFilePath != "" {
+		testsRoot, err := createTestsFolder(tagPath)
+		if err != nil {
+			return err
+		}
+
+		if err := file_resolver.CopyAndRenderFile(image.TestConfigFilePath, filepath.Join(testsRoot, "image.yml")); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -79,6 +96,26 @@ func setupVariantDir(variantPath string, variantDef *model.ImageVariant, image *
 			return errors.Join(errors.New("failed to copy rootfs for variant"), err)
 		}
 	}
+
+	if image.TestConfigFilePath != "" || variantDef.TestConfigFilePath != "" {
+		testsRoot, err := createTestsFolder(variantPath)
+		if err != nil {
+			return err
+		}
+
+		if image.TestConfigFilePath != "" {
+			if err := file_resolver.CopyAndRenderFile(image.TestConfigFilePath, filepath.Join(testsRoot, "image.yml")); err != nil {
+				return errors.Join(errors.New("failed to copy test config file"), err)
+			}
+		}
+
+		if variantDef.TestConfigFilePath != "" {
+			if err := file_resolver.CopyAndRenderFile(variantDef.TestConfigFilePath, filepath.Join(testsRoot, "variant.yml")); err != nil {
+				return errors.Join(errors.New("failed to copy test config file"), err)
+			}
+		}
+	}
+
 	return nil
 }
 
