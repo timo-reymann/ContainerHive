@@ -1,0 +1,19 @@
+tags:
+  - name: 8.0.100
+    versions:
+      dotnet-sdk-channel: 8.0.1xx
+  - name: 8.0.300
+    versions:
+      dotnet-sdk-channel: 8.0.3xx
+  - name: 8.0.200
+    versions:
+      dotnet-sdk-channel: 8.0.2xx
+
+variants:
+  - name: node
+    tag_suffix: -node
+    versions:
+      nodejs: "24"
+
+build_args:
+  foo: bar

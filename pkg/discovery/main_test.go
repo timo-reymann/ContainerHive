@@ -25,40 +25,68 @@ func TestDiscoverProject(t *testing.T) {
 		wantErr  bool
 	}{
 		"simple project": {
-			root: "testdata/simple-project",
+			root: "../testdata/simple-project",
 			expected: &model.ContainerHiveProject{
-				RootDir:        mustAbs(t, "testdata/simple-project"),
-				ConfigFilePath: mustAbs(t, "testdata/simple-project/hive.yml"),
+				RootDir:        mustAbs(t, "../testdata/simple-project"),
+				ConfigFilePath: mustAbs(t, "../testdata/simple-project/hive.yml"),
 				ImagesByIdentifier: map[string]*model.Image{
 					"dotnet/8": {
-						RootDir:            mustAbs(t, "testdata/simple-project/images/dotnet/8"),
-						RootFSDir:          mustAbs(t, "testdata/simple-project/images/dotnet/8/rootfs"),
+						RootDir:            mustAbs(t, "../testdata/simple-project/images/dotnet/8"),
+						RootFSDir:          mustAbs(t, "../testdata/simple-project/images/dotnet/8/rootfs"),
 						Identifier:         "dotnet/8",
 						Name:               "dotnet",
-						DefinitionFilePath: mustAbs(t, "testdata/simple-project/images/dotnet/8/image.yml"),
+						DefinitionFilePath: mustAbs(t, "../testdata/simple-project/images/dotnet/8/image.yml"),
 						Variants: map[string]*model.ImageVariant{
 							"node": {
 								Name:               "node",
-								RootDir:            mustAbs(t, "testdata/simple-project/images/dotnet/8/node"),
-								RootFSDir:          mustAbs(t, "testdata/simple-project/images/dotnet/8/node/rootfs"),
-								TestConfigFilePath: mustAbs(t, "testdata/simple-project/images/dotnet/8/node/test.yml.gotpl"),
+								RootDir:            mustAbs(t, "../testdata/simple-project/images/dotnet/8/node"),
+								RootFSDir:          mustAbs(t, "../testdata/simple-project/images/dotnet/8/node/rootfs"),
+								TestConfigFilePath: mustAbs(t, "../testdata/simple-project/images/dotnet/8/node/test.yml.gotpl"),
 								TagSuffix:          "-node",
 								Versions:           model.Versions{"nodejs": "24"},
 							},
 						},
+						Tags: map[string]*model.Tag{
+							"8.0.100": {
+								Name: "8.0.100",
+								Versions: model.Versions{
+									"dotnet-sdk-channel": "8.0.1xx",
+								},
+							},
+							"8.0.200": {
+								Name: "8.0.200",
+								Versions: model.Versions{
+									"dotnet-sdk-channel": "8.0.2xx",
+								},
+							},
+							"8.0.300": {
+								Name: "8.0.300",
+								Versions: model.Versions{
+									"dotnet-sdk-channel": "8.0.3xx",
+								},
+							},
+						},
 					},
 					"python": {
-						RootDir:            mustAbs(t, "testdata/simple-project/images/python"),
-						RootFSDir:          mustAbs(t, "testdata/simple-project/images/python/rootfs"),
+						RootDir:            mustAbs(t, "../testdata/simple-project/images/python"),
+						RootFSDir:          mustAbs(t, "../testdata/simple-project/images/python/rootfs"),
 						Identifier:         "python",
 						Name:               "python",
-						TestConfigFilePath: mustAbs(t, "testdata/simple-project/images/python/test.yml.gotpl"),
-						DefinitionFilePath: mustAbs(t, "testdata/simple-project/images/python/image.yml"),
+						TestConfigFilePath: mustAbs(t, "../testdata/simple-project/images/python/test.yml.gotpl"),
+						DefinitionFilePath: mustAbs(t, "../testdata/simple-project/images/python/image.yml"),
 						Versions: model.Versions{
 							"poetry": "2.2.1",
 							"uv":     "0.8.22",
 						},
 						Variants: map[string]*model.ImageVariant{},
+						Tags: map[string]*model.Tag{
+							"3.13.7": {
+								Name: "3.13.7",
+								Versions: model.Versions{
+									"python": "3.13.7",
+								},
+							},
+						},
 					},
 				},
 				ImagesByName: map[string][]*model.Image{
@@ -66,17 +94,37 @@ func TestDiscoverProject(t *testing.T) {
 						{
 							Identifier:         "dotnet/8",
 							Name:               "dotnet",
-							RootDir:            mustAbs(t, "testdata/simple-project/images/dotnet/8"),
-							RootFSDir:          mustAbs(t, "testdata/simple-project/images/dotnet/8/rootfs"),
-							DefinitionFilePath: mustAbs(t, "testdata/simple-project/images/dotnet/8/image.yml"),
+							RootDir:            mustAbs(t, "../testdata/simple-project/images/dotnet/8"),
+							RootFSDir:          mustAbs(t, "../testdata/simple-project/images/dotnet/8/rootfs"),
+							DefinitionFilePath: mustAbs(t, "../testdata/simple-project/images/dotnet/8/image.yml"),
 							Variants: map[string]*model.ImageVariant{
 								"node": {
 									Name:               "node",
-									RootDir:            mustAbs(t, "testdata/simple-project/images/dotnet/8/node"),
-									RootFSDir:          mustAbs(t, "testdata/simple-project/images/dotnet/8/node/rootfs"),
-									TestConfigFilePath: mustAbs(t, "testdata/simple-project/images/dotnet/8/node/test.yml.gotpl"),
+									RootDir:            mustAbs(t, "../testdata/simple-project/images/dotnet/8/node"),
+									RootFSDir:          mustAbs(t, "../testdata/simple-project/images/dotnet/8/node/rootfs"),
+									TestConfigFilePath: mustAbs(t, "../testdata/simple-project/images/dotnet/8/node/test.yml.gotpl"),
 									TagSuffix:          "-node",
 									Versions:           model.Versions{"nodejs": "24"},
+								},
+							},
+							Tags: map[string]*model.Tag{
+								"8.0.100": {
+									Name: "8.0.100",
+									Versions: model.Versions{
+										"dotnet-sdk-channel": "8.0.1xx",
+									},
+								},
+								"8.0.200": {
+									Name: "8.0.200",
+									Versions: model.Versions{
+										"dotnet-sdk-channel": "8.0.2xx",
+									},
+								},
+								"8.0.300": {
+									Name: "8.0.300",
+									Versions: model.Versions{
+										"dotnet-sdk-channel": "8.0.3xx",
+									},
 								},
 							},
 						},
@@ -85,15 +133,23 @@ func TestDiscoverProject(t *testing.T) {
 						{
 							Identifier:         "python",
 							Name:               "python",
-							RootDir:            mustAbs(t, "testdata/simple-project/images/python"),
-							RootFSDir:          mustAbs(t, "testdata/simple-project/images/python/rootfs"),
-							TestConfigFilePath: mustAbs(t, "testdata/simple-project/images/python/test.yml.gotpl"),
-							DefinitionFilePath: mustAbs(t, "testdata/simple-project/images/python/image.yml"),
+							RootDir:            mustAbs(t, "../testdata/simple-project/images/python"),
+							RootFSDir:          mustAbs(t, "../testdata/simple-project/images/python/rootfs"),
+							TestConfigFilePath: mustAbs(t, "../testdata/simple-project/images/python/test.yml.gotpl"),
+							DefinitionFilePath: mustAbs(t, "../testdata/simple-project/images/python/image.yml"),
 							Versions: model.Versions{
 								"poetry": "2.2.1",
 								"uv":     "0.8.22",
 							},
 							Variants: map[string]*model.ImageVariant{},
+							Tags: map[string]*model.Tag{
+								"3.13.7": {
+									Name: "3.13.7",
+									Versions: model.Versions{
+										"python": "3.13.7",
+									},
+								},
+							},
 						},
 					},
 				},

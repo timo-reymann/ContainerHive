@@ -1,0 +1,28 @@
+schemaVersion: 2.0.0
+commandTests:
+  - name: "python-version"
+    command: "python"
+    args: ["--version"]
+    expectedOutput: ["Python {{ versions.python }}"]
+
+fileExistenceTests:
+  - name: "rootfs-python-info-exists"
+    path: "/etc/python-info"
+    shouldExist: true
+  - name: "rootfs-image-level-only-exists"
+    path: "/etc/image-level-only"
+    shouldExist: true
+  - name: "rootfs-version-level-only-exists"
+    path: "/etc/version-level-only"
+    shouldExist: true
+
+fileContentTests:
+  - name: "rootfs-python-info-has-version-level-content"
+    path: "/etc/python-info"
+    expectedContents: ["level=version"]
+  - name: "rootfs-image-level-only-content"
+    path: "/etc/image-level-only"
+    expectedContents: ["source=python-image"]
+  - name: "rootfs-version-level-only-content"
+    path: "/etc/version-level-only"
+    expectedContents: ["source=python-3"]
