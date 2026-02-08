@@ -1,21 +1,37 @@
 package file_resolver
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/pkg/fileutils"
+	"github.com/timo-reymann/ContainerHive/internal/file_resolver/templating"
 )
 
-func CopyAndRenderFile(sourceFile, targetPath string) error {
-	ext, _ := strings.CutPrefix(filepath.Ext(sourceFile), ".")
+func CopyAndRenderFile(tmplCtx *templating.TemplateContext, src, target string) error {
+	ext, _ := strings.CutPrefix(filepath.Ext(src), ".")
 
-	switch ext {
-	case TemplateExtensionGoTemplate:
-		// TODO Template
-		break
+	if len(ext) < 2 {
+		_, err := fileutils.CopyFile(src, target)
+		return err
 	}
 
-	_, err := fileutils.CopyFile(sourceFile, targetPath)
-	return err
+	processor, ok := processorMapping[ext]
+	if !ok {
+		_, err := fileutils.CopyFile(src, target)
+		return err
+
+	}
+
+	content, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	rendered, err := processor.Process(tmplCtx, src, content)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(target, rendered, 0644)
 }
