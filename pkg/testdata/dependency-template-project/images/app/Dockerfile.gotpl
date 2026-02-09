@@ -1,0 +1,2 @@
+FROM {{ resolve_base "ubuntu" .Versions.ubuntu_tag }}
+RUN echo "app"

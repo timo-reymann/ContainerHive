@@ -1,0 +1,6 @@
+tags:
+  - name: "latest"
+versions:
+  ubuntu_tag: "22.04"
+depends_on:
+  - ubuntu

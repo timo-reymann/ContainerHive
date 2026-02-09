@@ -216,6 +216,32 @@ func TestRenderProject_SimpleProject(t *testing.T) {
 	})
 }
 
+func TestRenderProject_DependencyProject(t *testing.T) {
+	dist := discoverAndRender(t, "../testdata/dependency-project")
+
+	t.Run("preserves __hive__/ prefix in plain Dockerfile", func(t *testing.T) {
+		df := filepath.Join(dist, "python", "3.13", "Dockerfile")
+		assertFileExists(t, df)
+		assertFileContains(t, df, "FROM __hive__/ubuntu:22.04")
+	})
+
+	t.Run("ubuntu has plain FROM", func(t *testing.T) {
+		df := filepath.Join(dist, "ubuntu", "22.04", "Dockerfile")
+		assertFileExists(t, df)
+		assertFileContains(t, df, "FROM ubuntu:22.04")
+	})
+}
+
+func TestRenderProject_DependencyTemplateProject(t *testing.T) {
+	dist := discoverAndRender(t, "../testdata/dependency-template-project")
+
+	t.Run("renders resolve_base to __hive__/ prefix", func(t *testing.T) {
+		df := filepath.Join(dist, "app", "latest", "Dockerfile.gotpl")
+		assertFileExists(t, df)
+		assertFileContains(t, df, "FROM __hive__/ubuntu:22.04")
+	})
+}
+
 func TestRenderProject_MultiVariantProject(t *testing.T) {
 	dist := discoverAndRender(t, "../testdata/multi-variant-project")
 
