@@ -32,6 +32,11 @@ func (g *Graph) AddDependency(from, to string) {
 	g.edges[from] = append(g.edges[from], to)
 }
 
+// Dependencies returns the list of images that the given image depends on.
+func (g *Graph) Dependencies(name string) []string {
+	return g.edges[name]
+}
+
 // HasDependencies returns true if any dependency edges exist in the graph.
 func (g *Graph) HasDependencies() bool {
 	for _, deps := range g.edges {
