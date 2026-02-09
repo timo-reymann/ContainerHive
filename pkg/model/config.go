@@ -12,6 +12,7 @@ type ImageDefinitionConfig struct {
 	Variants  []VariantConfig `yaml:"variants" json:"variants,omitempty" jsonschema:"Variants to create for this image"`
 	Versions  Versions        `yaml:"versions" json:"versions,omitempty" jsonschema:"Versions to use for this image"`
 	BuildArgs BuildArgs       `yaml:"build_args" json:"build_args,omitempty" jsonschema:"Build args to add for this image"`
+	DependsOn []string        `yaml:"depends_on" json:"depends_on,omitempty" jsonschema:"Names of other images in this project that must be built before this image"`
 }
 
 type HiveProjectConfig struct {

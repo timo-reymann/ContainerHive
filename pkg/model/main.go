@@ -22,6 +22,7 @@ type Image struct {
 	BuildArgs           BuildArgs `yaml:"build_args"`
 	Tags                map[string]*Tag
 	Variants            map[string]*ImageVariant
+	DependsOn           []string
 }
 
 type ImageVariant struct {
