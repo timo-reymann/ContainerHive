@@ -14,7 +14,9 @@ import (
 	"github.com/timo-reymann/ContainerHive/internal/buildkit/build_context"
 	"github.com/timo-reymann/ContainerHive/internal/buildkit/cache"
 	containerStructureTest "github.com/timo-reymann/ContainerHive/internal/container_structure_test"
+	"github.com/timo-reymann/ContainerHive/internal/dependency"
 	"github.com/timo-reymann/ContainerHive/internal/docker"
+	"github.com/timo-reymann/ContainerHive/internal/registry"
 	"github.com/timo-reymann/ContainerHive/internal/syft"
 	"github.com/timo-reymann/ContainerHive/pkg/discovery"
 	"github.com/timo-reymann/ContainerHive/pkg/rendering"
@@ -63,10 +65,48 @@ func main() {
 		}
 	}
 
-	if err := rendering.RenderProject(ctx, project, "example/dist"); err != nil {
+	distPath := "example/dist"
+	if err := rendering.RenderProject(ctx, project, distPath); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Rendered project to example/dist")
+	log.Println("Rendered project to", distPath)
+
+	// Step: Scan rendered Dockerfiles for __hive__/ dependencies
+	log.Println("Scanning rendered project for base image dependencies...")
+	scannedGraph, err := dependency.ScanRenderedProject(distPath)
+	if err != nil {
+		log.Fatalf("Dependency scanning failed: %v", err)
+	}
+
+	// Step: Merge auto-detected deps with explicit depends_on from image configs
+	graph, err := dependency.BuildDependencyGraph(scannedGraph, project)
+	if err != nil {
+		log.Fatalf("Dependency graph construction failed: %v", err)
+	}
+
+	buildOrder, err := graph.TopologicalSort()
+	if err != nil {
+		log.Fatalf("Dependency resolution failed: %v", err)
+	}
+	log.Printf("Build order: %v", buildOrder)
+
+	// Step: Start local registry if there are inter-image dependencies
+	if graph.HasDependencies() {
+		reg := registry.NewRegistry()
+		if err := reg.Start(ctx); err != nil {
+			log.Fatalf("Failed to start registry: %v", err)
+		}
+		defer reg.Stop(ctx)
+		log.Printf("Registry started: local=%v address=%s", reg.IsLocal(), reg.Address())
+
+		// In a real build, for each image in buildOrder:
+		//   1. build_context.RewriteHiveRefs(dockerfile, reg.Address())
+		//   2. Build via BuildKit
+		//   3. If other images depend on it: reg.Push(ctx, name, tag, tarPath)
+		log.Println("(Ordered build with registry would happen here)")
+	} else {
+		log.Println("No inter-image dependencies, skipping registry")
+	}
 
 	tmpDir, err := os.MkdirTemp("", "ch-smoke-*")
 	if err != nil {
