@@ -46,6 +46,7 @@ var platform = "linux/" + runtime.GOARCH
 // newProgressWriter returns a buildkit status handler that displays build progress.
 func newProgressWriter() func(chan *client.SolveStatus) error {
 	return func(ch chan *client.SolveStatus) error {
+		// TODO for production support writing trace
 		d, err := progressui.NewDisplay(os.Stdout, progressui.TtyMode)
 		if err != nil {
 			d, _ = progressui.NewDisplay(os.Stdout, progressui.PlainMode)
