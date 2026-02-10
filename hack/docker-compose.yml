@@ -5,6 +5,8 @@ services:
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data
       - ./garage/garage.toml:/etc/garage.toml:ro
+    ports:
+      - 39505:3900
     healthcheck:
       test: [ "CMD", "/garage", "status" ]
       interval: 5s
@@ -57,8 +59,7 @@ services:
   buildkitd:
     image: moby/buildkit
     command: [ "--addr","tcp://0.0.0.0:8502" ]
-    ports:
-      - "127.0.0.1:8502:8502"
+    network_mode: host
     security_opt:
       - seccomp=unconfined
       - apparmor=unconfined
