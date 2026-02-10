@@ -56,6 +56,10 @@ func createTestsFolder(rootPath string) (string, error) {
 	return testsRoot, nil
 }
 
+func fixUpEntrypoint(root, entryPath string) string {
+	return filepath.Join(root, filepath.Base(file_resolver.RemoveTemplateExt(entryPath)))
+}
+
 func setupImageTagDir(tagPath string, image *model.Image, tag *model.Tag) error {
 	if err := mkdir(tagPath); err != nil {
 		return errors.Join(errors.New("failed to create tag directory"), err)
@@ -65,7 +69,7 @@ func setupImageTagDir(tagPath string, image *model.Image, tag *model.Tag) error 
 
 	if image.BuildEntryPointPath != "" {
 		// Strip template extension for output filename
-		if err := file_resolver.CopyAndRenderFile(tmplCtx, image.BuildEntryPointPath, filepath.Join(tagPath, filepath.Base(file_resolver.RemoveTemplateExt(image.BuildEntryPointPath)))); err != nil {
+		if err := file_resolver.CopyAndRenderFile(tmplCtx, image.BuildEntryPointPath, fixUpEntrypoint(tagPath, image.BuildEntryPointPath)); err != nil {
 			return errors.Join(errors.New("failed to copy build entrypoint"), err)
 		}
 	}
@@ -98,7 +102,7 @@ func setupVariantDir(variantPath string, image *model.Image, tag *model.Tag, var
 	}
 
 	if variantDef.BuildEntryPointPath != "" {
-		if err := file_resolver.CopyAndRenderFile(tmplCtx, variantDef.BuildEntryPointPath, filepath.Join(variantPath, filepath.Base(file_resolver.RemoveTemplateExt(variantDef.BuildEntryPointPath)))); err != nil {
+		if err := file_resolver.CopyAndRenderFile(tmplCtx, variantDef.BuildEntryPointPath, fixUpEntrypoint(variantPath, variantDef.BuildEntryPointPath)); err != nil {
 			return errors.Join(errors.New("failed to copy build entrypoint"), err)
 		}
 	}
