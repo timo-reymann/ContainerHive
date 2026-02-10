@@ -64,7 +64,8 @@ func setupImageTagDir(tagPath string, image *model.Image, tag *model.Tag) error 
 	tmplCtx := newTemplateContext(image, buildconfig_resolver.ForTag(image, tag))
 
 	if image.BuildEntryPointPath != "" {
-		if err := file_resolver.CopyAndRenderFile(tmplCtx, image.BuildEntryPointPath, filepath.Join(tagPath, filepath.Base(image.BuildEntryPointPath))); err != nil {
+		// Strip template extension for output filename
+		if err := file_resolver.CopyAndRenderFile(tmplCtx, image.BuildEntryPointPath, filepath.Join(tagPath, filepath.Base(file_resolver.RemoveTemplateExt(image.BuildEntryPointPath)))); err != nil {
 			return errors.Join(errors.New("failed to copy build entrypoint"), err)
 		}
 	}
@@ -97,7 +98,7 @@ func setupVariantDir(variantPath string, image *model.Image, tag *model.Tag, var
 	}
 
 	if variantDef.BuildEntryPointPath != "" {
-		if err := file_resolver.CopyAndRenderFile(tmplCtx, variantDef.BuildEntryPointPath, filepath.Join(variantPath, filepath.Base(variantDef.BuildEntryPointPath))); err != nil {
+		if err := file_resolver.CopyAndRenderFile(tmplCtx, variantDef.BuildEntryPointPath, filepath.Join(variantPath, filepath.Base(file_resolver.RemoveTemplateExt(variantDef.BuildEntryPointPath)))); err != nil {
 			return errors.Join(errors.New("failed to copy build entrypoint"), err)
 		}
 	}

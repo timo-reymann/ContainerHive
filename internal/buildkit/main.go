@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/docker/cli/cli/config"
 	"github.com/moby/buildkit/client"
@@ -21,14 +22,13 @@ type Client struct {
 }
 
 type BuildOpts struct {
-	ImageName       string
-	Platform        string
-	TarFile         string
-	BuildArgs       map[string]string
-	Labels          map[string]string
-	Cache           cache.BuildkitCache
-	BuildContext    build_context.BuildContext
-	RegistryAddress string // local registry address for __hive__/ resolution
+	ImageName    string
+	Platform     string
+	TarFile      string
+	BuildArgs    map[string]string
+	Labels       map[string]string
+	Cache        cache.BuildkitCache
+	BuildContext build_context.BuildContext
 }
 
 func NewClient(ctx context.Context, endpoint string) (*Client, error) {
@@ -74,7 +74,7 @@ func (c *Client) Build(ctx context.Context, opts *BuildOpts, statusUpdateHandler
 	}
 
 	frontendAttrs := map[string]string{
-		"filename":                    opts.BuildContext.FileName(),
+		"filename":                    filepath.Base(opts.BuildContext.FileName()),
 		"build-arg:SOURCE_DATE_EPOCH": "1770336000",
 		"platform":                    opts.Platform,
 		// this will be done using syft explicitly
