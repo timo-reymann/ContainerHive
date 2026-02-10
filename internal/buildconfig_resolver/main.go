@@ -1,6 +1,10 @@
 package buildconfig_resolver
 
-import "github.com/timo-reymann/ContainerHive/pkg/model"
+import (
+	"fmt"
+
+	"github.com/timo-reymann/ContainerHive/pkg/model"
+)
 
 type ResolvedBuildValues struct {
 	BuildArgs model.BuildArgs
@@ -44,4 +48,18 @@ func ForTagVariant(image *model.Image, variant *model.ImageVariant, tag *model.T
 	}
 
 	return resolved
+}
+
+func (r *ResolvedBuildValues) ToBuildArgs() model.BuildArgs {
+	var buildArgs = map[string]string{}
+
+	for k, v := range r.BuildArgs {
+		buildArgs[normalizeKey(k)] = v
+	}
+
+	for k, v := range r.Versions {
+		buildArgs[fmt.Sprintf("%s_VERSION", normalizeKey(k))] = v
+	}
+
+	return buildArgs
 }
