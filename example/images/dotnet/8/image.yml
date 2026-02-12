@@ -17,3 +17,7 @@ variants:
 
 build_args:
   foo: bar
+
+secrets:
+  foo:
+    value: bar
