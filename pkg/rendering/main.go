@@ -65,7 +65,12 @@ func setupImageTagDir(tagPath string, image *model.Image, tag *model.Tag) error 
 		return errors.Join(errors.New("failed to create tag directory"), err)
 	}
 
-	tmplCtx := newTemplateContext(image, buildconfig_resolver.ForTag(image, tag))
+	resolved, err := buildconfig_resolver.ForTag(image, tag)
+	if err != nil {
+		return errors.Join(errors.New("failed to resolve build configuration"), err)
+	}
+
+	tmplCtx := newTemplateContext(image, resolved)
 
 	if image.BuildEntryPointPath != "" {
 		// Strip template extension for output filename
@@ -95,7 +100,12 @@ func setupImageTagDir(tagPath string, image *model.Image, tag *model.Tag) error 
 }
 
 func setupVariantDir(variantPath string, image *model.Image, tag *model.Tag, variantDef *model.ImageVariant) error {
-	tmplCtx := newTemplateContext(image, buildconfig_resolver.ForTagVariant(image, variantDef, tag))
+	resolved, err := buildconfig_resolver.ForTagVariant(image, variantDef, tag)
+	if err != nil {
+		return errors.Join(errors.New("failed to resolve build configuration for variant"), err)
+	}
+
+	tmplCtx := newTemplateContext(image, resolved)
 
 	if err := mkdir(variantPath); err != nil {
 		return errors.Join(errors.New("failed to create variant directory"), err)

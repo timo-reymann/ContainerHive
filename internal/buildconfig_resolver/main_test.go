@@ -19,6 +19,7 @@ func TestForTag(t *testing.T) {
 			expected: &ResolvedBuildValues{
 				BuildArgs: model.BuildArgs{},
 				Versions:  model.Versions{},
+				Secrets:   map[string][]byte{},
 			},
 		},
 		"image with versions only": {
@@ -35,6 +36,7 @@ func TestForTag(t *testing.T) {
 					"python": "3.11",
 					"pip":    "23.0",
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 		"image with build args only": {
@@ -51,6 +53,7 @@ func TestForTag(t *testing.T) {
 					"WORKDIR":    "/app",
 				},
 				Versions: model.Versions{},
+				Secrets:  map[string][]byte{},
 			},
 		},
 		"tag with versions only": {
@@ -65,6 +68,7 @@ func TestForTag(t *testing.T) {
 				Versions: model.Versions{
 					"node": "20.0.0",
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 		"tag with build args only": {
@@ -79,6 +83,7 @@ func TestForTag(t *testing.T) {
 					"BUILD_TYPE": "release",
 				},
 				Versions: model.Versions{},
+				Secrets:  map[string][]byte{},
 			},
 		},
 		"tag versions override image versions": {
@@ -99,6 +104,7 @@ func TestForTag(t *testing.T) {
 					"python": "3.11", // overridden by tag
 					"pip":    "22.0", // from image
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 		"image build args override tag build args": {
@@ -119,6 +125,7 @@ func TestForTag(t *testing.T) {
 					"EXTRA_ARG":  "value",       // from image
 				},
 				Versions: model.Versions{},
+				Secrets:  map[string][]byte{},
 			},
 		},
 		"complex merge scenario": {
@@ -153,13 +160,17 @@ func TestForTag(t *testing.T) {
 					"poetry": "1.5.0", // from image
 					"pip":    "23.0",  // from tag
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := ForTag(tc.image, tc.tag)
+			got, err := ForTag(tc.image, tc.tag)
+			if err != nil {
+				t.Fatalf("ForTag() unexpected error: %v", err)
+			}
 
 			if diff := cmp.Diff(tc.expected, got); diff != "" {
 				t.Errorf("ForTag() mismatch (-expected +got):\n%s", diff)
@@ -182,6 +193,7 @@ func TestForTagVariant(t *testing.T) {
 			expected: &ResolvedBuildValues{
 				BuildArgs: model.BuildArgs{},
 				Versions:  model.Versions{},
+				Secrets:   map[string][]byte{},
 			},
 		},
 		"variant with versions only": {
@@ -197,6 +209,7 @@ func TestForTagVariant(t *testing.T) {
 				Versions: model.Versions{
 					"nodejs": "20.0.0",
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 		"variant with build args only": {
@@ -212,6 +225,7 @@ func TestForTagVariant(t *testing.T) {
 					"VARIANT_ARG": "value",
 				},
 				Versions: model.Versions{},
+				Secrets:  map[string][]byte{},
 			},
 		},
 		"variant versions override tag and image versions": {
@@ -239,6 +253,7 @@ func TestForTagVariant(t *testing.T) {
 					"poetry": "1.5.0",  // from image
 					"nodejs": "20.0.0", // from variant
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 		"variant build args override image build args": {
@@ -266,6 +281,7 @@ func TestForTagVariant(t *testing.T) {
 					"VARIANT_ARG": "value",        // from variant
 				},
 				Versions: model.Versions{},
+				Secrets:  map[string][]byte{},
 			},
 		},
 		"complex three-way merge": {
@@ -316,13 +332,17 @@ func TestForTagVariant(t *testing.T) {
 					"go":     "1.21",   // from tag
 					"nodejs": "20.0.0", // from variant
 				},
+				Secrets: map[string][]byte{},
 			},
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := ForTagVariant(tc.image, tc.variant, tc.tag)
+			got, err := ForTagVariant(tc.image, tc.variant, tc.tag)
+			if err != nil {
+				t.Fatalf("ForTagVariant() unexpected error: %v", err)
+			}
 
 			if diff := cmp.Diff(tc.expected, got); diff != "" {
 				t.Errorf("ForTagVariant() mismatch (-expected +got):\n%s", diff)

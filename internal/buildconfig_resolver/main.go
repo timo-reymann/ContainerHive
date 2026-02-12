@@ -3,18 +3,21 @@ package buildconfig_resolver
 import (
 	"fmt"
 
+	"github.com/timo-reymann/ContainerHive/internal/secrets"
 	"github.com/timo-reymann/ContainerHive/pkg/model"
 )
 
 type ResolvedBuildValues struct {
 	BuildArgs model.BuildArgs
 	Versions  model.Versions
+	Secrets   map[string][]byte
 }
 
-func ForTag(image *model.Image, tag *model.Tag) *ResolvedBuildValues {
+func ForTag(image *model.Image, tag *model.Tag) (*ResolvedBuildValues, error) {
 	resolved := &ResolvedBuildValues{
 		BuildArgs: tag.BuildArgs,
 		Versions:  image.Versions,
+		Secrets:   make(map[string][]byte),
 	}
 
 	if resolved.Versions == nil {
@@ -33,11 +36,23 @@ func ForTag(image *model.Image, tag *model.Tag) *ResolvedBuildValues {
 		resolved.BuildArgs[k] = v
 	}
 
-	return resolved
+	// Resolve secrets
+	for k, secret := range image.Secrets {
+		resolvedValue, err := secrets.Resolve(secret.SourceType, secret.Value)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve secret '%s': %w", k, err)
+		}
+		resolved.Secrets[k] = []byte(resolvedValue)
+	}
+
+	return resolved, nil
 }
 
-func ForTagVariant(image *model.Image, variant *model.ImageVariant, tag *model.Tag) *ResolvedBuildValues {
-	resolved := ForTag(image, tag)
+func ForTagVariant(image *model.Image, variant *model.ImageVariant, tag *model.Tag) (*ResolvedBuildValues, error) {
+	resolved, err := ForTag(image, tag)
+	if err != nil {
+		return nil, err
+	}
 
 	for k, v := range variant.Versions {
 		resolved.Versions[k] = v
@@ -47,7 +62,7 @@ func ForTagVariant(image *model.Image, variant *model.ImageVariant, tag *model.T
 		resolved.BuildArgs[k] = v
 	}
 
-	return resolved
+	return resolved, nil
 }
 
 func (r *ResolvedBuildValues) ToBuildArgs() model.BuildArgs {

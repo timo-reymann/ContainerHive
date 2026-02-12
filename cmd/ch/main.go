@@ -265,6 +265,12 @@ func main() {
 				root, _ := filepath.Abs(filepath.Dir(patchedPath))
 				imageTag := fmt.Sprintf("%s:%s", imgName, tagName)
 				tf := tarFilePath(distPath, imgName, tagName)
+				build_args, err := buildconfig_resolver.
+					ForTag(imageDef, imageDef.Tags[tagName])
+				if err != nil {
+					log.Fatalf("Failed to resolve build args for variant %s:%s: %v", imgName, tagName, err)
+				}
+
 				err = bkClient.Build(ctx, &buildkit.BuildOpts{
 					ImageName: imageTag,
 					Platform:  platform,
@@ -274,9 +280,8 @@ func main() {
 						Root:       root,
 						Dockerfile: "Dockerfile.patched",
 					},
-					BuildArgs: buildconfig_resolver.
-						ForTag(imageDef, imageDef.Tags[tagName]).
-						ToBuildArgs(),
+					BuildArgs: build_args.ToBuildArgs(),
+					Secrets:   build_args.Secrets,
 				}, newProgressWriter())
 				if err != nil {
 					log.Printf("Warning: Build failed for %s: %v", imageTag, err)
@@ -302,6 +307,13 @@ func main() {
 					variantRoot, _ := filepath.Abs(filepath.Dir(variantPatchedPath))
 					variantTag := fmt.Sprintf("%s:%s%s", imgName, tagName, variantDef.TagSuffix)
 					variantTf := tarFilePath(distPath, imgName, tagName+variantDef.TagSuffix)
+
+					build_args, err := buildconfig_resolver.
+						ForTagVariant(imageDef, variantDef, imageDef.Tags[tagName])
+					if err != nil {
+						log.Fatalf("Failed to resolve build args for variant %s:%s:%s: %v", imgName, tagName, variantName, err)
+					}
+
 					err = bkClient.Build(ctx, &buildkit.BuildOpts{
 						ImageName: variantTag,
 						Platform:  platform,
@@ -311,9 +323,7 @@ func main() {
 							Root:       variantRoot,
 							Dockerfile: "Dockerfile.patched",
 						},
-						BuildArgs: buildconfig_resolver.
-							ForTagVariant(imageDef, variantDef, imageDef.Tags[tagName]).
-							ToBuildArgs(),
+						BuildArgs: build_args.ToBuildArgs(),
 					}, newProgressWriter())
 					if err != nil {
 						log.Printf("Warning: Build failed for variant %s: %v", variantTag, err)

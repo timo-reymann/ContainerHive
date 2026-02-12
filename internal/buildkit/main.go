@@ -11,6 +11,7 @@ import (
 	"github.com/moby/buildkit/client"
 	"github.com/moby/buildkit/session"
 	"github.com/moby/buildkit/session/auth/authprovider"
+	"github.com/moby/buildkit/session/secrets/secretsprovider"
 	"github.com/timo-reymann/ContainerHive/internal/buildkit/build_context"
 	"github.com/timo-reymann/ContainerHive/internal/buildkit/cache"
 	"github.com/timo-reymann/ContainerHive/internal/utils"
@@ -26,6 +27,7 @@ type BuildOpts struct {
 	Platform     string
 	TarFile      string
 	BuildArgs    map[string]string
+	Secrets      map[string][]byte
 	Labels       map[string]string
 	Cache        cache.BuildkitCache
 	BuildContext build_context.BuildContext
@@ -91,6 +93,7 @@ func (c *Client) Build(ctx context.Context, opts *BuildOpts, statusUpdateHandler
 			authprovider.NewDockerAuthProvider(authprovider.DockerAuthProviderConfig{
 				AuthConfigProvider: authprovider.LoadAuthConfig(dockerConfig),
 			}),
+			secretsprovider.FromMap(opts.Secrets),
 		},
 		CacheExports: buildCache,
 		CacheImports: buildCache,
