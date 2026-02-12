@@ -9,3 +9,11 @@ tags:
 
 build_args:
   foo: bar
+
+secrets:
+  api_key:
+    source: env
+    value: API_KEY
+  token:
+    source: plain
+    value: secret_token_value
