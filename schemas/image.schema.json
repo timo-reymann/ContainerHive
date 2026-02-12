@@ -97,10 +97,6 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the secret"
-          },
           "source": {
             "type": "string",
             "description": "Source type of the secret (env, plain). If omitted, auto-detected from value."
@@ -111,7 +107,6 @@
           }
         },
         "required": [
-          "name",
           "value"
         ],
         "additionalProperties": false
