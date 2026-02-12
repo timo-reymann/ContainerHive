@@ -1,6 +1,8 @@
 FROM {{ resolve_base "ubuntu" "22.04" }}
 USER 0
 
+COPY rootfs/ /
+
 ENV PYENV_ROOT=/usr/share/pyenv \
 	PATH=/root/.local/bin:/usr/share/pyenv/shims:/usr/share/pyenv/bin:$PATH \
 	PYTHON_CONFIGURE_OPTS="--enable-shared --enable-optimizations"
