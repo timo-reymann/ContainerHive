@@ -11,6 +11,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func ensureSecretsInitialized(secrets model.Secrets) model.Secrets {
+	if secrets == nil {
+		return make(model.Secrets)
+	}
+	return secrets
+}
+
 const rootFsDirName = "rootfs"
 
 var imageConfigFileNames = []string{
@@ -101,7 +108,7 @@ func processImageConfig(projectRoot, configFilePath string) (*model.Image, error
 		DefinitionFilePath:  configFilePath,
 		Versions:            parsedImageDef.Versions,
 		BuildArgs:           parsedImageDef.BuildArgs,
-		Secrets:             parsedImageDef.Secrets,
+		Secrets:             ensureSecretsInitialized(parsedImageDef.Secrets),
 		Variants:            indexedVariants,
 		Tags:                processTags(parsedImageDef),
 		DependsOn:           parsedImageDef.DependsOn,
