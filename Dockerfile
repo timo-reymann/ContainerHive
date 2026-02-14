@@ -18,7 +18,8 @@ FROM chainguard/wolfi-base
 ARG BUILD_TIME
 ARG BUILD_VERSION
 ARG BUILD_COMMIT_REF
-LABEL org.opencontainers.image.title="ContainerHive" \
+LABEL 
+LABEL org.opencontainers.image.licenses="gpl-3.0"org.opencontainers.image.title="ContainerHive" \
       org.opencontainers.image.description="Swarm it. Build it. Run it. — Managing container base and library images has never been easier." \
       org.opencontainers.image.ref.name="main" \
       org.opencontainers.image.licenses='GPLv3' \
