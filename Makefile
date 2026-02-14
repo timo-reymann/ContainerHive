@@ -54,7 +54,7 @@ build-image: build-image-container-hive ## Build all images
 build: create-dist build-linux build-darwin ## Build binaries for all platform
 
 bundle:
-	@cd dist/ && find * -type d -exec sh -c 'cd {} && cp ../../LICENSE LICENSE.txt && cp ../../THIRD_PARTY_NOTICES . && tar -cf - . | zstd -9 -o ../{}.tar.zst' \;
+	@cd dist/ && find * -type d -exec sh -c 'cd {} && cp ../../LICENSE LICENSE.txt && cp ../../NOTICE . && tar -cf - . | zstd -9 -o ../{}.tar.zst' \;
 	@find ./dist/*.tar.zst -type f -exec sh -c 'sha256sum {} | cut -d " " -f 1 > {}.sha256' {} \;
 
 pack: create-checksums bundle ## Create checksums and pack archives for delivery

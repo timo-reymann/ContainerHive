@@ -11,7 +11,7 @@ RUN if [[ "$(arch)" == "x86_64" ]]; then \
 
 FROM scratch AS meta
 COPY LICENSE /
-COPY THIRD_PARTY_NOTICES /
+COPY NOTICE /
 
 FROM chainguard/wolfi-base
 
